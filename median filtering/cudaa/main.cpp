@@ -2,6 +2,11 @@
 #include<stdio.h>
 #include<iostream>
 #include <ctime>
+#include <stdlib.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 inline void printTime(string task, struct timespec start, struct timespec end)
 {
     uint64_t diff = (1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec) / 1e6;
