@@ -2,7 +2,8 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
+//#include <dirent.h>
+#include <filesystem> 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,6 +19,7 @@
 
 using namespace cv;
 using namespace std;
+namespace fs = std::filesystem;
 
 typedef struct FakeMat_ {
 	unsigned char *Ptr;
@@ -111,15 +113,12 @@ inline void printTime(string task, struct timespec start, struct timespec end)
     printf("[INFO] %s operation lasted %llu ms\n", task.c_str(), diff);
 }
 
-void read_directory(string name, vector<string> *v)
-{
-    DIR* dirp = opendir(name.c_str());
-    struct dirent * dp;
-    while ((dp = readdir(dirp)) != NULL) {
-        v->push_back(dp->d_name);
+void read_directory(const string& name, vector<string>& v) {
+    for (const auto& entry : fs::directory_iterator(name)) {
+        v.push_back(entry.path().string());
     }
-    closedir(dirp);
 }
+
 
 int readImage(string filename, Mat* inputImage, Mat* imageGrey)
 {
@@ -149,7 +148,7 @@ int readImage(string filename, Mat* inputImage, Mat* imageGrey)
 
 void writeImage(string dirname, string filename, string prefix, Mat outputImage)
 {
-    string outFile = dirname + string("/") + prefix + filename;
+    fs::path outFile = fs::path(dirname) / fs::path(prefix + filename);
 
     cv::imwrite(outFile.c_str(), outputImage);
 }
@@ -169,7 +168,7 @@ int main(int argc, char **argv)
     string outputDir = string("motified") + inputDir;
 
     vector<string> inputFilenames;
-    read_directory(inputDir, &inputFilenames);
+    read_directory(inputDir, inputFilenames);
     
     vector<Mat> outputImages;
     vector<Mat> inputImages;
@@ -190,25 +189,29 @@ int main(int argc, char **argv)
     cudaMalloc(&d_filteredImage, sizeof(unsigned char) * MAX_IMAGE_SIZE * NUM_STREAMS);
 
     // Read in images from the fs
-    for (int i = 0; i < inputFilenames.size(); i++)
+
+    for (const auto& entry : fs::directory_iterator(inputDir))
+{
+    if (entry.is_regular_file())
     {
         Mat imageMat;
-	Mat outputMat;
-        string curImage = inputFilenames[i]; 
-	string filename = inputDir + curImage;
+        Mat outputMat;
+        string filename = entry.path().string();
 
         // Read in image
         int err = readImage(
             filename, 
             &imageMat, 
-	    &outputMat
+            &outputMat
         );
 
-	if (err != 0) { continue; }
+        if (err != 0) { continue; }
 
         inputImages.push_back(imageMat);
-	outputImages.push_back(outputMat);
+        outputImages.push_back(outputMat);
     }
+}
+
 
     FakeMat *outputImagesArray;
     cudaMallocHost(&outputImagesArray, sizeof(FakeMat) * inputImages.size());
@@ -291,10 +294,9 @@ int main(int argc, char **argv)
 
 
     // printf("[DEBUG] %s\n", "Mkdir");
-    struct stat st = {0};
-    if (stat(outputDir.c_str(), &st) == -1) {
-        mkdir(outputDir.c_str(), 0700);
-    }
+    if (!fs::exists(outputDir)) {
+    fs::create_directory(outputDir);
+}
     // printf("[DEBUG] %s\n", "Done");
 
     // printf("[DEBUG] %s\n", "Write images");
@@ -319,7 +321,7 @@ int main(int argc, char **argv)
     // printf("[DEBUG] %s\n", "Done");
 
     // Free Memory
-    cudaFreeHost(&outputImages);
+    cudaFreeHost(outputImagesArray);
     cudaFree(&d_rgbaImage);
     cudaFree(&d_greyImage);
 
