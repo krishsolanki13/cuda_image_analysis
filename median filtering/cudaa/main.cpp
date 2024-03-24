@@ -1,5 +1,7 @@
 #include "medianFilter.h"
-
+#include<stdio.h>
+#include<iostream>
+#include <ctime>
 inline void printTime(string task, struct timespec start, struct timespec end)
 {
     uint64_t diff = (1000000000L * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec) / 1e6;
