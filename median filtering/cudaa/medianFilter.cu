@@ -1,6 +1,10 @@
 
-#include "medianFilter.h"
-
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <device_launch_parameters.h>
+#include <iostream>
+#include "MedianFilter.h"
+#include <time.h>
 __global__ void rgbaToGreyscaleGPU(
     uchar4 *rgbaImage, 
     unsigned char *greyImage,
