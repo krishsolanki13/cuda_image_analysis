@@ -109,7 +109,7 @@ int main() {
     free(h_output);
     //free(h_output_cpu);
 
-    printf("Done\n")
+    printf("Done\n");
 
     return 0;
 }
