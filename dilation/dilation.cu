@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
-#define MASK_WIDTH 5
+#define MASK_WIDTH 15
 #define MASK_RADIUS MASK_WIDTH/2
 #define BLOCK_SIZE 16
 
@@ -30,7 +30,7 @@ __global__ void dilation(float *input, float *output, int width, int height) {
 
 int main() {
     // Read input image using OpenCV
-    cv::Mat inputImage = cv::imread("./input_image.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat inputImage = cv::imread("./input_image.png", cv::IMREAD_GRAYSCALE);
     if (inputImage.empty()) {
         printf("Failed to read input image\n");
         return -1;

@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 
-#define MASK_WIDTH 5
+#define MASK_WIDTH 15
 #define MASK_RADIUS MASK_WIDTH/2
 
 // CPU function for dilation operation
@@ -34,7 +34,7 @@ void cpuDilation(const cv::Mat& input, cv::Mat& output) {
 
 int main() {
     // Read input image using OpenCV
-    cv::Mat inputImage = cv::imread("./input_image.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat inputImage = cv::imread("./input_image.png", cv::IMREAD_GRAYSCALE);
     if (inputImage.empty()) {
         printf("Failed to read input image\n");
         return -1;
@@ -50,7 +50,6 @@ int main() {
 
     // Allocate memory for output images
     cv::Mat outputImageCPU(height, width, CV_8UC1);
-    cv::Mat outputImageGPU(height, width, CV_8UC1);
 
     // Measure CPU execution time
     auto startCPU = std::chrono::high_resolution_clock::now();
@@ -64,7 +63,6 @@ int main() {
 
     // Display output images
     cv::imshow("Dilated Image (CPU)", outputImageCPU);
-    cv::imshow("Dilated Image (GPU)", outputImageGPU);
     cv::waitKey(0);
 
     return 0;

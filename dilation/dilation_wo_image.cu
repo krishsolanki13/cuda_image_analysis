@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define MASK_WIDTH 5
+#define MASK_WIDTH 15
 #define MASK_RADIUS MASK_WIDTH/2
 #define BLOCK_SIZE 16
 
